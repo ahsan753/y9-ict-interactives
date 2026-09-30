@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Licence Detective</title>
+<meta name="description" content="Year 9 ICT, Lesson 7: tell proprietary and open source software apart, then advise people which to choose.">
+<style>
+  :root {
+    --navy: #0F172A; --ink: #1E293B; --grey: #64748B; --line: #CBD5E1; --slate: #F1F5F9; --bg: #F8FAFC;
+    --blue: #1D4ED8; --blue-pale: #DBEAFE; --green: #15803D; --green-pale: #DCFCE7;
+    --amber: #B45309; --amber-pale: #FEF3C7; --purple: #6D28D9; --purple-pale: #EDE9FE;
+    --red: #B91C1C; --red-pale: #FEE2E2; --white: #FFFFFF;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    font-family: Calibri, "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
+    background: var(--bg); color: var(--ink); font-size: 19px; line-height: 1.45;
+  }
+  header { background: var(--navy); color: var(--white); padding: 18px 20px; }
+  header .inner, main { max-width: 860px; margin: 0 auto; }
+  header .kicker { color: #38BDF8; font-weight: 700; font-size: 14px; letter-spacing: .06em; text-transform: uppercase; }
+  header h1 { margin: 4px 0 0; font-size: 32px; line-height: 1.15; }
+  main { padding: 20px 16px 48px; }
+  h2 { font-size: 26px; margin: 0 0 6px; line-height: 1.2; }
+  p { margin: 0 0 12px; }
+  .card { background: var(--white); border: 1px solid var(--line); border-radius: 14px; padding: 20px; margin-bottom: 16px; }
+  .tip { background: var(--purple-pale); border: 0; }
+  .tip strong { color: var(--purple); }
+  .tip ol { margin: 8px 0 0; padding-left: 24px; }
+  .tip li { margin-bottom: 4px; }
+  .rounds { display: grid; gap: 16px; grid-template-columns: 1fr 1fr; }
+  @media (max-width: 640px) { .rounds { grid-template-columns: 1fr; } header h1 { font-size: 26px; } }
+  .round-card h2 { font-size: 22px; }
+  .tag { display: inline-block; font-size: 13px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; padding: 3px 10px; border-radius: 999px; margin-bottom: 8px; }
+  .tag.green { background: var(--green-pale); color: var(--green); }
+  .tag.grey { background: var(--slate); color: var(--grey); }
+  button { font: inherit; cursor: pointer; border-radius: 10px; border: 2px solid transparent; padding: 12px 18px; font-weight: 700; }
+  button:focus-visible { outline: 3px solid #F59E0B; outline-offset: 2px; }
+  .btn-primary { background: var(--navy); color: var(--white); }
+  .btn-primary:hover { background: #1E293B; }
+  .btn-ghost { background: var(--white); color: var(--ink); border-color: var(--line); }
+  .progress { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; color: var(--grey); font-weight: 700; font-size: 16px; }
+  .bar { height: 8px; background: var(--slate); border-radius: 99px; overflow: hidden; margin-bottom: 18px; }
+  .bar > span { display: block; height: 100%; background: var(--green); width: 0; transition: width .25s; }
+  .product { font-size: 34px; font-weight: 700; line-height: 1.1; margin: 0; }
+  .num { color: var(--grey); font-weight: 700; margin-right: 8px; }
+  .what { color: var(--grey); margin: 4px 0 14px; }
+  .chip { display: inline-block; background: var(--slate); border-radius: 8px; padding: 6px 12px; font-weight: 700; margin-bottom: 14px; }
+  .licence { background: var(--amber-pale); border-left: 6px solid var(--amber); border-radius: 8px; padding: 14px 16px; margin: 0 0 18px; }
+  .licence .label { font-size: 14px; font-weight: 700; color: var(--amber); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 4px; }
+  .licence p { margin: 0; font-size: 20px; }
+  .choices { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 480px) { .choices { grid-template-columns: 1fr; } }
+  .choice { padding: 16px; font-size: 21px; border: 2px solid var(--line); background: var(--white); color: var(--ink); text-align: center; }
+  .choice.prop:hover:not(:disabled) { border-color: var(--blue); background: var(--blue-pale); }
+  .choice.open:hover:not(:disabled) { border-color: var(--green); background: var(--green-pale); }
+  .choice:disabled { cursor: default; opacity: .55; }
+  .choice.picked { opacity: 1; border-width: 3px; }
+  .choice.picked.prop { border-color: var(--blue); background: var(--blue-pale); }
+  .choice.picked.open { border-color: var(--green); background: var(--green-pale); }
+  .choice small { display: block; font-weight: 400; font-size: 15px; color: var(--grey); }
+  .feedback { margin-top: 16px; border-radius: 10px; padding: 14px 16px; }
+  .feedback.right { background: var(--green-pale); }
+  .feedback.wrong { background: var(--red-pale); }
+  .feedback .head { font-weight: 700; font-size: 21px; margin-bottom: 4px; }
+  .feedback.right .head { color: var(--green); }
+  .feedback.wrong .head { color: var(--red); }
+  .feedback .type { font-weight: 700; }
+  .next-row { display: flex; justify-content: flex-end; margin-top: 14px; }
+  .reminder { font-size: 16px; color: var(--grey); margin: 14px 0 0; }
+  .score { font-size: 48px; font-weight: 700; color: var(--green); line-height: 1; margin: 6px 0 10px; }
+  table { width: 100%; border-collapse: collapse; margin: 10px 0 16px; font-size: 18px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+  th { color: var(--grey); font-size: 14px; text-transform: uppercase; letter-spacing: .05em; }
+  td.letter { font-weight: 700; font-size: 20px; width: 60px; text-align: center; }
+  td.letter.p { color: var(--blue); } td.letter.o { color: var(--green); }
+  .tick { color: var(--green); font-weight: 700; } .cross { color: var(--red); font-weight: 700; }
+  .scenario { font-size: 21px; margin-bottom: 18px; }
+  .who { font-size: 28px; font-weight: 700; margin: 0 0 8px; }
+  .actions { display: flex; gap: 10px; flex-wrap: wrap; }
+  .hidden { display: none !important; }
+  footer { text-align: center; color: var(--grey); font-size: 14px; padding: 0 16px 24px; }
+</style>
+</head>
+<body>
+<header>
+  <div class="inner">
+    <div class="kicker">Year 9 ICT &nbsp;•&nbsp; Lesson 7 &nbsp;•&nbsp; Software licences</div>
+    <h1>Licence Detective</h1>
+  </div>
+</header>
+
+<main>
+  <!-- HOME -->
+  <section id="home">
+    <div class="card tip">
+      <p><strong>How to crack every case</strong></p>
+      <ol>
+        <li><strong>Can anyone see and change the source code?</strong> Yes → <em>open source</em>. No, it is kept secret → <em>proprietary</em>.</li>
+        <li><strong>Do I have to pay?</strong> This is only the price. It does not decide the type.</li>
+      </ol>
+    </div>
+    <div class="rounds">
+      <div class="card round-card">
+        <span class="tag green">In the lesson</span>
+        <h2>Round 1: Sort the software</h2>
+        <p>Ten products. Read what each licence says, then decide: proprietary or open source? Type P or O in Section B1 of your Task Sheet as you go.</p>
+        <button class="btn-primary" id="start1">Start Round 1</button>
+      </div>
+      <div class="card round-card">
+        <span class="tag grey">Going further</span>
+        <h2>Round 2: The Advice Desk</h2>
+        <p>Four people need software. Which type would you advise each of them to choose — and why?</p>
+        <button class="btn-ghost" id="start2">Start Round 2</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ROUND 1 -->
+  <section id="round1" class="hidden" aria-live="polite">
+    <div class="progress"><span id="r1-count">Case 1 of 10</span><span id="r1-score">Score: 0</span></div>
+    <div class="bar"><span id="r1-bar"></span></div>
+    <div class="card">
+      <p class="product"><span class="num" id="r1-num">1.</span><span id="r1-name"></span></p>
+      <p class="what" id="r1-what"></p>
+      <span class="chip" id="r1-price"></span>
+      <div class="licence">
+        <div class="label">What the licence says (in plain English)</div>
+        <p id="r1-licence"></p>
+      </div>
+      <div class="choices">
+        <button class="choice prop" data-pick="P">Proprietary<small>type P</small></button>
+        <button class="choice open" data-pick="O">Open source<small>type O</small></button>
+      </div>
+      <div id="r1-feedback" class="feedback hidden"></div>
+      <div class="next-row"><button class="btn-primary hidden" id="r1-next">Next case →</button></div>
+    </div>
+    <p class="reminder">Remember to type P or O next to this product in Section B1.</p>
+  </section>
+
+  <!-- ROUND 1 RESULTS -->
+  <section id="r1-results" class="hidden">
+    <div class="card">
+      <h2>Round 1 complete</h2>
+      <div class="score" id="r1-final"></div>
+      <p>Check your Section B1 answers against this list. Then answer B2 on your Task Sheet.</p>
+      <table>
+        <thead><tr><th>#</th><th>Product</th><th>Answer</th><th>You</th></tr></thead>
+        <tbody id="r1-table"></tbody>
+      </table>
+      <div class="actions">
+        <button class="btn-ghost" id="r1-again">Play Round 1 again</button>
+        <button class="btn-ghost" id="r1-home">Back to the start</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ROUND 2 -->
+  <section id="round2" class="hidden" aria-live="polite">
+    <div class="progress"><span id="r2-count">Person 1 of 4</span><span>The Advice Desk</span></div>
+    <div class="bar"><span id="r2-bar"></span></div>
+    <div class="card">
+      <p class="who" id="r2-who"></p>
+      <p class="scenario" id="r2-text"></p>
+      <div class="choices">
+        <button class="choice prop" data-pick="P">Proprietary</button>
+        <button class="choice open" data-pick="O">Open source</button>
+      </div>
+      <div id="r2-feedback" class="feedback hidden"></div>
+      <div class="next-row"><button class="btn-primary hidden" id="r2-next">Next person →</button></div>
+    </div>
+  </section>
+
+  <!-- ROUND 2 RESULTS -->
+  <section id="r2-results" class="hidden">
+    <div class="card">
+      <h2>Advice Desk closed</h2>
+      <div class="score" id="r2-final"></div>
+      <p>Now answer D2 on your Task Sheet: which person was hardest to advise, and why?</p>
+      <div class="actions">
+        <button class="btn-ghost" id="r2-again">Play Round 2 again</button>
+        <button class="btn-ghost" id="r2-home">Back to the start</button>
+      </div>
+    </div>
+  </section>
+</main>
+<footer>USI ICT Department &nbsp;•&nbsp; Year 9 ICT &nbsp;•&nbsp; Spec 1.3.5</footer>
+
+<script>
+(function () {
+  var CASES = [
+    { name: "Microsoft Word", what: "Word processor", price: "Pay every year",
+      licence: "You may use this program while you keep paying. You may not copy it, share it or change how it works. Microsoft keeps the source code private.",
+      answer: "P", why: "The source code is kept private and you may not change it. You are paying for permission to use it." },
+    { name: "LibreOffice", what: "Office suite, like Word, Excel and PowerPoint", price: "Free",
+      licence: "Anyone may use, copy and share this program. The source code is published online, and you may change it and share your changes.",
+      answer: "O", why: "The source code is published and anyone may change it and share it." },
+    { name: "Adobe Photoshop", what: "Photo editor", price: "Pay every month",
+      licence: "You may use this program while your subscription lasts. You may not copy it or change it. Adobe keeps the source code private.",
+      answer: "P", why: "The source code is private. The monthly price is a clue, but the secret code is what decides it." },
+    { name: "GIMP", what: "Photo editor", price: "Free",
+      licence: "You are free to run, study, change and share this program. The full source code is available to download.",
+      answer: "O", why: "Anyone can download the source code, change it and share it." },
+    { name: "Google Chrome", what: "Web browser", price: "Free",
+      licence: "Free to download and use. You may not copy, change or take apart the program. Google keeps its source code private.",
+      answer: "P", why: "It is free, but the source code is private and you may not change it. Free software can still be proprietary — this is called freeware." },
+    { name: "Mozilla Firefox", what: "Web browser", price: "Free",
+      licence: "The source code is published. You may study it, change it and share your own version.",
+      answer: "O", why: "The source code is published and you may change it and share it." },
+    { name: "Audacity", what: "Sound editor", price: "Free",
+      licence: "Anyone may download the source code, change it and share it with others.",
+      answer: "O", why: "The source code is open for anyone to read, change and share." },
+    { name: "Minecraft", what: "Game", price: "Pay once",
+      licence: "You buy a licence to play. You may not copy the game, sell it or share its code. Mojang keeps the source code private.",
+      answer: "P", why: "You pay once for a licence, and the source code is kept private." },
+    { name: "WhatsApp", what: "Messaging app", price: "Free",
+      licence: "Free to download and use. You may not copy, change or take apart the app. The source code is kept private.",
+      answer: "P", why: "It costs nothing, but the source code is private — so it is proprietary freeware." },
+    { name: "Linux (Ubuntu)", what: "Operating system", price: "Free",
+      licence: "Free to use on as many computers as you like. The source code is published, and you may change it and share it.",
+      answer: "O", why: "The source code is published and anyone may change and share it." }
+  ];
+
+  var PEOPLE = [
+    { who: "Layla, a wedding photographer",
+      text: "Her clients and the printing company send her Photoshop files. If her software stops working the day before a wedding, she needs someone to call straight away.",
+      best: "P",
+      reason: "Proprietary fits best. Her files will open exactly as her clients made them, and the company offers a helpline when something goes wrong.",
+      but: "Open source would save her money, but files from clients may not open perfectly and there is no helpline." },
+    { who: "A youth charity",
+      text: "It has been given 20 old laptops and has no money for software. One volunteer knows a lot about computers.",
+      best: "O",
+      reason: "Open source fits best. It is usually free on as many computers as you like, so the charity pays nothing, and the volunteer can help with problems.",
+      but: "Proprietary software would mean paying for 20 licences, which the charity cannot afford." },
+    { who: "A new tech start-up",
+      text: "Its programmers want to add their own tools to their video-editing software, so it works exactly the way the company needs.",
+      best: "O",
+      reason: "Open source fits best. The source code is published, so their own programmers are allowed to change it and add the tools.",
+      but: "With proprietary software they could only ask the company to add the tools, and wait." },
+    { who: "A bank",
+      text: "It needs security updates on a fixed timetable and a 24-hour helpline written into a contract, because customers' money is at stake.",
+      best: "P",
+      reason: "Proprietary fits best. The company that owns the software can promise updates and support in a contract.",
+      but: "Some companies do sell paid support for open source software too — so a bank could argue for either. That is what makes it hard!" }
+  ];
+
+  function $(id) { return document.getElementById(id); }
+  var sections = ["home", "round1", "r1-results", "round2", "r2-results"];
+  function show(id) {
+    sections.forEach(function (s) { $(s).classList.toggle("hidden", s !== id); });
+    window.scrollTo(0, 0);
+  }
+  function label(x) { return x === "P" ? "Proprietary" : "Open source"; }
+
+  // ---------- Round 1 ----------
+  var r1 = { i: 0, score: 0, picks: [] };
+  var r1Buttons = document.querySelectorAll("#round1 .choice");
+  function r1Load() {
+    var c = CASES[r1.i];
+    $("r1-count").textContent = "Case " + (r1.i + 1) + " of " + CASES.length;
+    $("r1-score").textContent = "Score: " + r1.score;
+    $("r1-bar").style.width = (r1.i / CASES.length * 100) + "%";
+    $("r1-num").textContent = (r1.i + 1) + ".";
+    $("r1-name").textContent = c.name;
+    $("r1-what").textContent = c.what;
+    $("r1-price").textContent = "Price: " + c.price;
+    $("r1-licence").textContent = "“" + c.licence + "”";
+    r1Buttons.forEach(function (b) { b.disabled = false; b.classList.remove("picked"); });
+    $("r1-feedback").className = "feedback hidden";
+    $("r1-next").classList.add("hidden");
+    r1Buttons[0].focus();
+  }
+  r1Buttons.forEach(function (b) {
+    b.addEventListener("click", function () {
+      var c = CASES[r1.i], pick = b.getAttribute("data-pick"), right = pick === c.answer;
+      r1.picks[r1.i] = pick;
+      if (right) r1.score += 1;
+      r1Buttons.forEach(function (x) { x.disabled = true; });
+      b.classList.add("picked");
+      var fb = $("r1-feedback");
+      fb.className = "feedback " + (right ? "right" : "wrong");
+      fb.innerHTML = "";
+      var head = document.createElement("div"); head.className = "head";
+      head.textContent = right ? "Case cracked!" : "Not quite.";
+      var body = document.createElement("p"); body.style.margin = "0";
+      var t = document.createElement("span"); t.className = "type";
+      t.textContent = c.name + " is " + label(c.answer).toLowerCase() + " (" + c.answer + "). ";
+      body.appendChild(t); body.appendChild(document.createTextNode(c.why));
+      fb.appendChild(head); fb.appendChild(body);
+      $("r1-score").textContent = "Score: " + r1.score;
+      $("r1-bar").style.width = ((r1.i + 1) / CASES.length * 100) + "%";
+      var nx = $("r1-next");
+      nx.textContent = r1.i === CASES.length - 1 ? "See my results →" : "Next case →";
+      nx.classList.remove("hidden"); nx.focus();
+    });
+  });
+  $("r1-next").addEventListener("click", function () {
+    r1.i += 1;
+    if (r1.i < CASES.length) { r1Load(); return; }
+    $("r1-final").textContent = r1.score + " / " + CASES.length;
+    var tb = $("r1-table"); tb.innerHTML = "";
+    CASES.forEach(function (c, k) {
+      var tr = document.createElement("tr");
+      var ok = r1.picks[k] === c.answer;
+      [String(k + 1), c.name].forEach(function (v) { var td = document.createElement("td"); td.textContent = v; tr.appendChild(td); });
+      var a = document.createElement("td"); a.className = "letter " + c.answer.toLowerCase(); a.textContent = c.answer; tr.appendChild(a);
+      var y = document.createElement("td"); y.className = ok ? "tick" : "cross"; y.textContent = ok ? "✓" : "✗ (" + r1.picks[k] + ")"; tr.appendChild(y);
+      tb.appendChild(tr);
+    });
+    show("r1-results");
+  });
+  function startR1() { r1 = { i: 0, score: 0, picks: [] }; show("round1"); r1Load(); }
+  $("start1").addEventListener("click", startR1);
+  $("r1-again").addEventListener("click", startR1);
+  $("r1-home").addEventListener("click", function () { show("home"); });
+
+  // ---------- Round 2 ----------
+  var r2 = { i: 0, score: 0 };
+  var r2Buttons = document.querySelectorAll("#round2 .choice");
+  function r2Load() {
+    var pp = PEOPLE[r2.i];
+    $("r2-count").textContent = "Person " + (r2.i + 1) + " of " + PEOPLE.length;
+    $("r2-bar").style.width = (r2.i / PEOPLE.length * 100) + "%";
+    $("r2-who").textContent = pp.who;
+    $("r2-text").textContent = pp.text;
+    r2Buttons.forEach(function (b) { b.disabled = false; b.classList.remove("picked"); });
+    $("r2-feedback").className = "feedback hidden";
+    $("r2-next").classList.add("hidden");
+    r2Buttons[0].focus();
+  }
+  r2Buttons.forEach(function (b) {
+    b.addEventListener("click", function () {
+      var pp = PEOPLE[r2.i], pick = b.getAttribute("data-pick"), right = pick === pp.best;
+      if (right) r2.score += 1;
+      r2Buttons.forEach(function (x) { x.disabled = true; });
+      b.classList.add("picked");
+      var fb = $("r2-feedback");
+      fb.className = "feedback " + (right ? "right" : "wrong");
+      fb.innerHTML = "";
+      var head = document.createElement("div"); head.className = "head";
+      head.textContent = right ? "Good advice!" : "A consultant would probably choose differently.";
+      var p1 = document.createElement("p"); p1.textContent = pp.reason;
+      var p2 = document.createElement("p"); p2.style.margin = "0"; p2.textContent = pp.but;
+      fb.appendChild(head); fb.appendChild(p1); fb.appendChild(p2);
+      $("r2-bar").style.width = ((r2.i + 1) / PEOPLE.length * 100) + "%";
+      var nx = $("r2-next");
+      nx.textContent = r2.i === PEOPLE.length - 1 ? "Close the Advice Desk →" : "Next person →";
+      nx.classList.remove("hidden"); nx.focus();
+    });
+  });
+  $("r2-next").addEventListener("click", function () {
+    r2.i += 1;
+    if (r2.i < PEOPLE.length) { r2Load(); return; }
+    $("r2-final").textContent = r2.score + " / " + PEOPLE.length;
+    show("r2-results");
+  });
+  function startR2() { r2 = { i: 0, score: 0 }; show("round2"); r2Load(); }
+  $("start2").addEventListener("click", startR2);
+  $("r2-again").addEventListener("click", startR2);
+  $("r2-home").addEventListener("click", function () { show("home"); });
+})();
+</script>
+</body>
+</html>
