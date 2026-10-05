@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Update Inbox</title>
+<meta name="description" content="Year 9 ICT, Lesson 8: work out why each software update was sent, then spot the fake updates.">
+<style>
+  :root {
+    --navy: #0F172A; --ink: #1E293B; --grey: #64748B; --line: #CBD5E1; --slate: #F1F5F9; --bg: #F8FAFC;
+    --blue: #1D4ED8; --blue-pale: #DBEAFE; --green: #15803D; --green-pale: #DCFCE7;
+    --amber: #B45309; --amber-pale: #FEF3C7; --purple: #6D28D9; --purple-pale: #EDE9FE;
+    --orange: #EA580C; --orange-pale: #FFEDD5; --red: #B91C1C; --red-pale: #FEE2E2; --white: #FFFFFF;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    font-family: Calibri, "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
+    background: var(--bg); color: var(--ink); font-size: 19px; line-height: 1.45;
+  }
+  header { background: var(--navy); color: var(--white); padding: 18px 20px; }
+  header .inner, main { max-width: 860px; margin: 0 auto; }
+  header .kicker { color: #38BDF8; font-weight: 700; font-size: 14px; letter-spacing: .06em; text-transform: uppercase; }
+  header h1 { margin: 4px 0 0; font-size: 32px; line-height: 1.15; }
+  main { padding: 20px 16px 48px; }
+  h2 { font-size: 26px; margin: 0 0 6px; line-height: 1.2; }
+  p { margin: 0 0 12px; }
+  .card { background: var(--white); border: 1px solid var(--line); border-radius: 14px; padding: 20px; margin-bottom: 16px; }
+  .tip { background: var(--purple-pale); border: 0; }
+  .tip strong { color: var(--purple); }
+  .key { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 18px; margin-top: 8px; }
+  @media (max-width: 560px) { .key { grid-template-columns: 1fr; } }
+  .key div { font-size: 18px; }
+  .key b { display: inline-block; width: 30px; height: 30px; line-height: 30px; text-align: center; border-radius: 8px; color: var(--white); margin-right: 8px; }
+  .rounds { display: grid; gap: 16px; grid-template-columns: 1fr 1fr; }
+  @media (max-width: 640px) { .rounds { grid-template-columns: 1fr; } header h1 { font-size: 26px; } }
+  .round-card h2 { font-size: 22px; }
+  .tag { display: inline-block; font-size: 13px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; padding: 3px 10px; border-radius: 999px; margin-bottom: 8px; }
+  .tag.green { background: var(--green-pale); color: var(--green); }
+  .tag.grey { background: var(--slate); color: var(--grey); }
+  button { font: inherit; cursor: pointer; border-radius: 10px; border: 2px solid transparent; padding: 12px 18px; font-weight: 700; }
+  button:focus-visible { outline: 3px solid #F59E0B; outline-offset: 2px; }
+  .btn-primary { background: var(--navy); color: var(--white); }
+  .btn-primary:hover { background: #1E293B; }
+  .btn-ghost { background: var(--white); color: var(--ink); border-color: var(--line); }
+  .progress { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; color: var(--grey); font-weight: 700; font-size: 16px; }
+  .bar { height: 8px; background: var(--slate); border-radius: 99px; overflow: hidden; margin-bottom: 18px; }
+  .bar > span { display: block; height: 100%; background: var(--green); width: 0; transition: width .25s; }
+  .num { color: var(--grey); font-weight: 700; margin-right: 8px; }
+  .app { font-size: 30px; font-weight: 700; line-height: 1.15; margin: 0 0 12px; }
+  .notice { background: var(--slate); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; margin: 0 0 18px; }
+  .notice .where { font-size: 14px; font-weight: 700; color: var(--grey); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 6px; }
+  .notice p { margin: 0; font-size: 21px; }
+  .notice.alarm { background: #FFF7ED; border-color: #FDBA74; }
+  .question { font-weight: 700; margin-bottom: 10px; }
+  .choices { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 480px) { .choices { grid-template-columns: 1fr; } }
+  .choice { padding: 14px; font-size: 20px; border: 2px solid var(--line); background: var(--white); color: var(--ink); text-align: left; display: flex; align-items: center; gap: 12px; }
+  .choice .letter { flex: 0 0 auto; width: 38px; height: 38px; line-height: 38px; text-align: center; border-radius: 9px; color: var(--white); font-size: 21px; }
+  .choice:hover:not(:disabled) { background: var(--slate); }
+  .choice:disabled { cursor: default; opacity: .5; }
+  .choice.picked { opacity: 1; border-width: 3px; border-color: var(--navy); background: var(--slate); }
+  .choice.correct { opacity: 1; border-color: var(--green); background: var(--green-pale); }
+  .bgB { background: var(--orange); } .bgS { background: var(--red); } .bgF { background: var(--purple); } .bgP { background: var(--blue); }
+  .bgSafe { background: var(--green); } .bgScam { background: var(--red); }
+  .feedback { margin-top: 16px; border-radius: 10px; padding: 14px 16px; }
+  .feedback.right { background: var(--green-pale); }
+  .feedback.wrong { background: var(--red-pale); }
+  .feedback .head { font-weight: 700; font-size: 21px; margin-bottom: 4px; }
+  .feedback.right .head { color: var(--green); }
+  .feedback.wrong .head { color: var(--red); }
+  .feedback .type { font-weight: 700; }
+  .next-row { display: flex; justify-content: flex-end; margin-top: 14px; }
+  .reminder { font-size: 16px; color: var(--grey); margin: 14px 0 0; }
+  .score { font-size: 48px; font-weight: 700; color: var(--green); line-height: 1; margin: 6px 0 10px; }
+  table { width: 100%; border-collapse: collapse; margin: 10px 0 16px; font-size: 18px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+  th { color: var(--grey); font-size: 14px; text-transform: uppercase; letter-spacing: .05em; }
+  td.letter { font-weight: 700; font-size: 20px; width: 60px; text-align: center; }
+  .tick { color: var(--green); font-weight: 700; } .cross { color: var(--red); font-weight: 700; }
+  .actions { display: flex; gap: 10px; flex-wrap: wrap; }
+  .hidden { display: none !important; }
+  footer { text-align: center; color: var(--grey); font-size: 14px; padding: 0 16px 24px; }
+</style>
+</head>
+<body>
+<header>
+  <div class="inner">
+    <div class="kicker">Year 9 ICT &nbsp;•&nbsp; Lesson 8 &nbsp;•&nbsp; Software updates</div>
+    <h1>Update Inbox</h1>
+  </div>
+</header>
+
+<main>
+  <!-- HOME -->
+  <section id="home">
+    <div class="card tip">
+      <p style="margin:0"><strong>Why is software updated? Four reasons</strong></p>
+      <div class="key">
+        <div><b class="bgB">B</b>Bug fix: it fixes a mistake</div>
+        <div><b class="bgS">S</b>Security: it closes a security hole</div>
+        <div><b class="bgF">F</b>New feature: it adds something new</div>
+        <div><b class="bgP">P</b>Performance: it runs faster or better</div>
+      </div>
+    </div>
+    <div class="rounds">
+      <div class="card round-card">
+        <span class="tag green">In the lesson</span>
+        <h2>Round 1: Why was it sent?</h2>
+        <p>Eight updates have arrived. Read each one and decide why it was sent: B, S, F or P. Type the letter in Section B1 of your Task Sheet as you go.</p>
+        <button class="btn-primary" id="start1">Start Round 1</button>
+      </div>
+      <div class="card round-card">
+        <span class="tag grey">Going further</span>
+        <h2>Round 2: Safe or scam?</h2>
+        <p>Some update messages are fakes that install harmful software. Can you tell which six are real and which are scams?</p>
+        <button class="btn-ghost" id="start2">Start Round 2</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ROUND 1 -->
+  <section id="round1" class="hidden" aria-live="polite">
+    <div class="progress"><span id="r1-count">Update 1 of 8</span><span id="r1-score">Score: 0</span></div>
+    <div class="bar"><span id="r1-bar"></span></div>
+    <div class="card">
+      <p class="app"><span class="num" id="r1-num">1.</span><span id="r1-name"></span></p>
+      <div class="notice">
+        <div class="where">What's new in this update</div>
+        <p id="r1-text"></p>
+      </div>
+      <p class="question">Why was this update sent?</p>
+      <div class="choices">
+        <button class="choice" data-pick="B"><span class="letter bgB">B</span>Bug fix</button>
+        <button class="choice" data-pick="S"><span class="letter bgS">S</span>Security</button>
+        <button class="choice" data-pick="F"><span class="letter bgF">F</span>New feature</button>
+        <button class="choice" data-pick="P"><span class="letter bgP">P</span>Performance</button>
+      </div>
+      <div id="r1-feedback" class="feedback hidden"></div>
+      <div class="next-row"><button class="btn-primary hidden" id="r1-next">Next update →</button></div>
+    </div>
+    <p class="reminder">Remember to type the letter next to this update in Section B1.</p>
+  </section>
+
+  <!-- ROUND 1 RESULTS -->
+  <section id="r1-results" class="hidden">
+    <div class="card">
+      <h2>Round 1 complete</h2>
+      <div class="score" id="r1-final"></div>
+      <p>Check your Section B1 answers against this list. Then answer B2 on your Task Sheet.</p>
+      <table>
+        <thead><tr><th>#</th><th>Update</th><th>Answer</th><th>You</th></tr></thead>
+        <tbody id="r1-table"></tbody>
+      </table>
+      <div class="actions">
+        <button class="btn-ghost" id="r1-again">Play Round 1 again</button>
+        <button class="btn-ghost" id="r1-home">Back to the start</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ROUND 2 -->
+  <section id="round2" class="hidden" aria-live="polite">
+    <div class="progress"><span id="r2-count">Message 1 of 6</span><span id="r2-score">Score: 0</span></div>
+    <div class="bar"><span id="r2-bar"></span></div>
+    <div class="card">
+      <div class="notice" id="r2-box">
+        <div class="where" id="r2-where"></div>
+        <p id="r2-text"></p>
+      </div>
+      <p class="question">Is this update message safe or a scam?</p>
+      <div class="choices">
+        <button class="choice" data-pick="SAFE"><span class="letter bgSafe">✓</span>Safe: a real update</button>
+        <button class="choice" data-pick="SCAM"><span class="letter bgScam">!</span>Scam: a fake update</button>
+      </div>
+      <div id="r2-feedback" class="feedback hidden"></div>
+      <div class="next-row"><button class="btn-primary hidden" id="r2-next">Next message →</button></div>
+    </div>
+  </section>
+
+  <!-- ROUND 2 RESULTS -->
+  <section id="r2-results" class="hidden">
+    <div class="card">
+      <h2>Round 2 complete</h2>
+      <div class="score" id="r2-final"></div>
+      <p><strong>The rule:</strong> real updates come from your device's Settings or its official app store. A message that pops up on a website, in an email or in a text and asks you to click is almost always a scam.</p>
+      <p>Now answer D2 on your Task Sheet.</p>
+      <div class="actions">
+        <button class="btn-ghost" id="r2-again">Play Round 2 again</button>
+        <button class="btn-ghost" id="r2-home">Back to the start</button>
+      </div>
+    </div>
+  </section>
+</main>
+<footer>USI ICT Department &nbsp;•&nbsp; Year 9 ICT &nbsp;•&nbsp; Spec 1.3.7</footer>
+
+<script>
+(function () {
+  var NAMES = { B: "Bug fix", S: "Security", F: "New feature", P: "Performance" };
+  var UPDATES = [
+    { name: "Messaging app", text: "Fixed a problem that made the app close suddenly when you sent a photo.", answer: "B",
+      why: "Something was going wrong — the app crashed — and this update repairs that mistake." },
+    { name: "Phone operating system", text: "Closes a weakness that could let an attacker take control of your phone through a fake web page.", answer: "S",
+      why: "It closes a gap that attackers could use to get in. Security fixes like this are the most important updates to install." },
+    { name: "Football game", text: "New: team up with a friend in the new two-player mode.", answer: "F",
+      why: "It adds something you could not do before." },
+    { name: "Laptop operating system", text: "Your battery now lasts up to an hour longer on a single charge.", answer: "P",
+      why: "Nothing was broken and nothing new was added — the laptop simply runs better." },
+    { name: "Web browser", text: "Fixes a weakness that let harmful websites read your saved passwords.", answer: "S",
+      why: "Harmful websites could steal data. The update closes that security hole." },
+    { name: "Word processor", text: "Fixed: page numbers sometimes printed in the wrong place.", answer: "B",
+      why: "It repairs a mistake in the program. Annoying, but not a way for attackers to get in — so it is a bug fix, not security." },
+    { name: "Photo editor", text: "Photos now open twice as fast on older laptops.", answer: "P",
+      why: "The program does the same job, just faster. That is performance." },
+    { name: "Video-call app", text: "New: blur the background behind you during a call.", answer: "F",
+      why: "It adds a new thing you can do." }
+  ];
+
+  var MESSAGES = [
+    { where: "Pop-up on a free film website", alarm: true,
+      text: "WARNING! Your video player is out of date. Click DOWNLOAD NOW to keep watching.", answer: "SCAM",
+      why: "Real updates do not arrive as pop-ups on websites. A pop-up that rushes you into downloading something is a classic way to install malware." },
+    { where: "Settings → Software Update, on your phone", alarm: false,
+      text: "A new version of your phone's operating system is available. Download and install.", answer: "SAFE",
+      why: "You found it yourself in Settings — the official place updates come from." },
+    { where: "Email from \"Micros0ft Support\" with an attachment: update.exe", alarm: true,
+      text: "Urgent! Install the attached security update today or your account will be closed.", answer: "SCAM",
+      why: "Look at the spelling (a zero in Micros0ft), the threat, and the attachment. Companies do not send updates as email attachments." },
+    { where: "App Store → Updates", alarm: false,
+      text: "3 apps have updates available. Update all.", answer: "SAFE",
+      why: "The official app store is a safe place to get updates." },
+    { where: "Text message from an unknown number", alarm: true,
+      text: "Your phone has 5 viruses! Tap this link to update your security now.", answer: "SCAM",
+      why: "A text cannot know your phone has viruses. The link is the trap." },
+    { where: "Laptop notification from Windows Update", alarm: false,
+      text: "Restart required to finish installing updates. Restart now or schedule a time.", answer: "SAFE",
+      why: "It comes from the operating system's own update tool and lets you choose when. Save your work first!" }
+  ];
+
+  function $(id) { return document.getElementById(id); }
+  var sections = ["home", "round1", "r1-results", "round2", "r2-results"];
+  function show(id) {
+    sections.forEach(function (s) { $(s).classList.toggle("hidden", s !== id); });
+    window.scrollTo(0, 0);
+  }
+  function feedback(box, right, headRight, headWrong, typeText, why) {
+    box.className = "feedback " + (right ? "right" : "wrong");
+    box.innerHTML = "";
+    var head = document.createElement("div"); head.className = "head";
+    head.textContent = right ? headRight : headWrong;
+    var body = document.createElement("p"); body.style.margin = "0";
+    var t = document.createElement("span"); t.className = "type"; t.textContent = typeText + " ";
+    body.appendChild(t); body.appendChild(document.createTextNode(why));
+    box.appendChild(head); box.appendChild(body);
+  }
+
+  // ---------- Round 1 ----------
+  var r1 = { i: 0, score: 0, picks: [] };
+  var r1Buttons = document.querySelectorAll("#round1 .choice");
+  function r1Load() {
+    var u = UPDATES[r1.i];
+    $("r1-count").textContent = "Update " + (r1.i + 1) + " of " + UPDATES.length;
+    $("r1-score").textContent = "Score: " + r1.score;
+    $("r1-bar").style.width = (r1.i / UPDATES.length * 100) + "%";
+    $("r1-num").textContent = (r1.i + 1) + ".";
+    $("r1-name").textContent = u.name;
+    $("r1-text").textContent = "“" + u.text + "”";
+    r1Buttons.forEach(function (b) { b.disabled = false; b.classList.remove("picked", "correct"); });
+    $("r1-feedback").className = "feedback hidden";
+    $("r1-next").classList.add("hidden");
+    r1Buttons[0].focus();
+  }
+  r1Buttons.forEach(function (b) {
+    b.addEventListener("click", function () {
+      var u = UPDATES[r1.i], pick = b.getAttribute("data-pick"), right = pick === u.answer;
+      r1.picks[r1.i] = pick;
+      if (right) r1.score += 1;
+      r1Buttons.forEach(function (x) {
+        x.disabled = true;
+        if (x.getAttribute("data-pick") === u.answer) x.classList.add("correct");
+      });
+      if (!right) b.classList.add("picked");
+      feedback($("r1-feedback"), right, "Correct!", "Not quite.", NAMES[u.answer] + " (" + u.answer + ").", u.why);
+      $("r1-score").textContent = "Score: " + r1.score;
+      $("r1-bar").style.width = ((r1.i + 1) / UPDATES.length * 100) + "%";
+      var nx = $("r1-next");
+      nx.textContent = r1.i === UPDATES.length - 1 ? "See my results →" : "Next update →";
+      nx.classList.remove("hidden"); nx.focus();
+    });
+  });
+  $("r1-next").addEventListener("click", function () {
+    r1.i += 1;
+    if (r1.i < UPDATES.length) { r1Load(); return; }
+    $("r1-final").textContent = r1.score + " / " + UPDATES.length;
+    var tb = $("r1-table"); tb.innerHTML = "";
+    UPDATES.forEach(function (u, k) {
+      var tr = document.createElement("tr");
+      var ok = r1.picks[k] === u.answer;
+      [String(k + 1), u.name].forEach(function (v) { var td = document.createElement("td"); td.textContent = v; tr.appendChild(td); });
+      var a = document.createElement("td"); a.className = "letter"; a.textContent = u.answer; tr.appendChild(a);
+      var y = document.createElement("td"); y.className = ok ? "tick" : "cross"; y.textContent = ok ? "✓" : "✗ (" + r1.picks[k] + ")"; tr.appendChild(y);
+      tb.appendChild(tr);
+    });
+    show("r1-results");
+  });
+  function startR1() { r1 = { i: 0, score: 0, picks: [] }; show("round1"); r1Load(); }
+  $("start1").addEventListener("click", startR1);
+  $("r1-again").addEventListener("click", startR1);
+  $("r1-home").addEventListener("click", function () { show("home"); });
+
+  // ---------- Round 2 ----------
+  var r2 = { i: 0, score: 0 };
+  var r2Buttons = document.querySelectorAll("#round2 .choice");
+  function r2Load() {
+    var m = MESSAGES[r2.i];
+    $("r2-count").textContent = "Message " + (r2.i + 1) + " of " + MESSAGES.length;
+    $("r2-score").textContent = "Score: " + r2.score;
+    $("r2-bar").style.width = (r2.i / MESSAGES.length * 100) + "%";
+    $("r2-where").textContent = m.where;
+    $("r2-text").textContent = "“" + m.text + "”";
+    $("r2-box").className = "notice" + (m.alarm ? " alarm" : "");
+    r2Buttons.forEach(function (b) { b.disabled = false; b.classList.remove("picked", "correct"); });
+    $("r2-feedback").className = "feedback hidden";
+    $("r2-next").classList.add("hidden");
+    r2Buttons[0].focus();
+  }
+  r2Buttons.forEach(function (b) {
+    b.addEventListener("click", function () {
+      var m = MESSAGES[r2.i], pick = b.getAttribute("data-pick"), right = pick === m.answer;
+      if (right) r2.score += 1;
+      r2Buttons.forEach(function (x) {
+        x.disabled = true;
+        if (x.getAttribute("data-pick") === m.answer) x.classList.add("correct");
+      });
+      if (!right) b.classList.add("picked");
+      feedback($("r2-feedback"), right, "Well spotted!", "Careful!", m.answer === "SAFE" ? "Safe." : "Scam.", m.why);
+      $("r2-score").textContent = "Score: " + r2.score;
+      $("r2-bar").style.width = ((r2.i + 1) / MESSAGES.length * 100) + "%";
+      var nx = $("r2-next");
+      nx.textContent = r2.i === MESSAGES.length - 1 ? "See my results →" : "Next message →";
+      nx.classList.remove("hidden"); nx.focus();
+    });
+  });
+  $("r2-next").addEventListener("click", function () {
+    r2.i += 1;
+    if (r2.i < MESSAGES.length) { r2Load(); return; }
+    $("r2-final").textContent = r2.score + " / " + MESSAGES.length;
+    show("r2-results");
+  });
+  function startR2() { r2 = { i: 0, score: 0 }; show("round2"); r2Load(); }
+  $("start2").addEventListener("click", startR2);
+  $("r2-again").addEventListener("click", startR2);
+  $("r2-home").addEventListener("click", function () { show("home"); });
+})();
+</script>
+</body>
+</html>
