@@ -1,0 +1,447 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Till Settings Lab — Qahwa House</title>
+<meta name="description" content="Year 9 ICT, Lesson 16: configure a Qahwa House till's accessibility settings for four different people.">
+<style>
+  :root {
+    color-scheme: light;
+    --navy: #0F172A; --ink: #1E293B; --grey: #64748B; --line: #CBD5E1; --slate: #F1F5F9; --bg: #F8FAFC;
+    --blue: #1D4ED8; --blue-pale: #DBEAFE; --green: #15803D; --green-pale: #DCFCE7;
+    --amber: #B45309; --amber-pale: #FEF3C7; --purple: #6D28D9; --purple-pale: #EDE9FE;
+    --red: #B91C1C; --red-pale: #FEE2E2; --white: #FFFFFF;
+    --palm: #1F4D3A; --saffron: #C8962E; --cream: #F5EBDD; --coffee: #4A2C1D;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    font-family: Calibri, "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
+    background: var(--bg); color: var(--ink); font-size: 19px; line-height: 1.45;
+  }
+  header { background: var(--navy); color: var(--white); padding: 18px 20px; }
+  header .inner, main { max-width: 1180px; margin: 0 auto; }
+  header .kicker { color: #38BDF8; font-weight: 700; font-size: 14px; letter-spacing: .06em; text-transform: uppercase; }
+  header h1 { margin: 4px 0 0; font-size: 32px; line-height: 1.15; }
+  header .sub { color: #CBD5E1; margin: 2px 0 0; font-size: 18px; }
+  main { padding: 20px 16px 40px; }
+  h2 { font-size: 22px; margin: 0 0 8px; line-height: 1.2; }
+  p { margin: 0 0 10px; }
+  .card { background: var(--white); border: 1px solid var(--line); border-radius: 14px; padding: 18px; margin-bottom: 16px; }
+  .tip { background: var(--purple-pale); border: 0; }
+  .tip strong { color: var(--purple); }
+  .tip ol { margin: 6px 0 0; padding-left: 24px; }
+  .tip li { margin-bottom: 2px; }
+  button { font: inherit; cursor: pointer; border-radius: 10px; border: 2px solid transparent; padding: 10px 16px; font-weight: 700; }
+  button:focus-visible { outline: 3px solid #F59E0B; outline-offset: 2px; }
+  .btn-primary { background: var(--navy); color: var(--white); }
+  .btn-primary:hover { background: #334155; }
+  .btn-ghost { background: var(--white); color: var(--ink); border-color: var(--line); }
+  .btn-ghost:hover { border-color: var(--grey); }
+
+  /* Person tabs */
+  .tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 0; }
+  .tab { background: var(--white); color: var(--ink); border: 2px solid var(--line); border-bottom-width: 2px; text-align: left; padding: 10px 14px; border-radius: 12px 12px 0 0; }
+  .tab small { display: block; font-weight: 400; font-size: 15px; color: var(--grey); }
+  .tab[aria-selected="true"] { background: var(--green-pale); border-color: var(--green); }
+  .tab .done { color: var(--green); }
+  .person { border-radius: 0 0 14px 14px; border: 2px solid var(--green); border-top: 0; background: var(--green-pale); padding: 18px; margin-bottom: 18px; }
+  .person-top { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; }
+  .person h2 { font-size: 28px; margin: 0; }
+  .tag { display: inline-block; font-size: 13px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; padding: 3px 10px; border-radius: 999px; }
+  .tag.real { background: var(--palm); color: var(--white); }
+  .tag.example { background: var(--white); color: var(--grey); border: 1px solid var(--line); }
+  .need { font-size: 21px; margin: 8px 0 14px; }
+  .actions { display: flex; gap: 10px; flex-wrap: wrap; }
+  .feedback { margin-top: 14px; border-radius: 10px; padding: 14px 16px; background: var(--white); border: 2px solid var(--line); }
+  .feedback.pass { border-color: var(--green); }
+  .feedback.fail { border-color: var(--red); }
+  .feedback.stale { border-color: var(--line); color: var(--grey); }
+  .feedback .head { font-weight: 700; font-size: 21px; margin-bottom: 6px; }
+  .feedback.pass .head { color: var(--green); }
+  .feedback.fail .head { color: var(--red); }
+  .feedback ul { list-style: none; margin: 0; padding: 0; }
+  .feedback li { margin: 4px 0; padding-left: 30px; position: relative; }
+  .feedback li .mark { position: absolute; left: 0; font-weight: 700; }
+  .feedback li.ok .mark { color: var(--green); }
+  .feedback li.no .mark { color: var(--red); }
+  .feedback .extra { margin: 10px 0 0; color: var(--ink); font-style: italic; }
+  .reminder { font-size: 16px; color: var(--grey); margin: 10px 0 0; }
+
+  /* Lab layout */
+  .lab { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+  @media (max-width: 860px) { .lab { grid-template-columns: 1fr; } }
+  @media (max-width: 640px) {
+    .tabs { grid-template-columns: 1fr 1fr; }
+    .tab { border-radius: 12px; }
+    .tabs { gap: 8px; margin-bottom: 10px; }
+    .person { border-radius: 14px; border-top: 2px solid var(--green); }
+    header h1 { font-size: 26px; }
+  }
+  .panel-title { font-size: 14px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--grey); margin: 0 0 8px; }
+
+  /* ---------- The mock till ---------- */
+  .till-frame { background: #1E293B; border-radius: 18px; padding: 14px; }
+  .till-scroll { border-radius: 8px; overflow: auto; background: #FFFFFF; position: relative; }
+  .till-scroll.zoomed { max-height: 640px; }
+  .till { --tfs: 12px; font-size: var(--tfs); line-height: 1.3; background: #FFFFFF; color: #A1A1AA; position: relative; }
+  .till[data-text="m"] { --tfs: 16px; }
+  .till[data-text="l"] { --tfs: 21px; }
+  .till[data-text="xl"] { --tfs: 26px; }
+  .till[data-magnifier="on"] { zoom: 1.5; }
+  .till-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; background: var(--palm); color: var(--cream); padding: .6em .9em; }
+  .till-head .brand { font-weight: 700; color: var(--saffron); font-size: 1.15em; }
+  .till-head .branch { font-size: .9em; }
+  .till-body { padding: .8em; }
+  .till-label { font-weight: 700; text-transform: uppercase; letter-spacing: .05em; font-size: .8em; margin: .2em 0 .5em; color: #B8B8C0; }
+  .menu-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: .9em; }
+  .item { background: #F4F4F5; border: 1px solid #E4E4E7; border-radius: 6px; padding: 4px 6px; min-height: 34px; display: flex; flex-direction: column; justify-content: center; color: #A1A1AA; }
+  .item .price { font-size: .85em; }
+  .till[data-buttons="l"] .menu-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .till[data-buttons="l"] .item { min-height: 92px; padding: 14px 16px; border-radius: 12px; border-width: 2px; }
+  .orders { display: grid; gap: 6px; margin-bottom: .8em; }
+  .order { display: flex; align-items: center; justify-content: space-between; gap: 10px; background: #FAFAFA; border: 1px solid #E4E4E7; border-radius: 6px; padding: .4em .6em; }
+  .pill { display: inline-flex; align-items: center; justify-content: center; min-width: 28px; height: 1.3em; min-height: 14px; border-radius: 999px; padding: 0 .55em; font-weight: 700; font-size: .85em; color: #FFFFFF; }
+  .pill.ready { background: #4CAF50; }
+  .pill.waiting { background: #E5534B; }
+  .pill .word { display: none; }
+  .till[data-labels="on"] .pill .word { display: inline; }
+  .till[data-labels="on"] .pill { color: #FFFFFF; }
+  .till[data-labels="on"] .pill.ready { background: #166534; }
+  .till[data-labels="on"] .pill.waiting { background: #991B1B; }
+  .alert-row { display: flex; align-items: center; gap: .5em; font-size: .9em; }
+  .bell { display: inline-block; }
+  .bell.ring { animation: ring .25s ease-in-out 6; }
+  @keyframes ring { 0%,100% { transform: rotate(0); } 25% { transform: rotate(-18deg); } 75% { transform: rotate(18deg); } }
+  .beep { font-style: italic; }
+  .flash-banner { display: none; margin: 0 .8em .8em; padding: .6em .8em; border-radius: 8px; background: var(--saffron); color: #1A1A1A; font-weight: 700; text-align: center; }
+  .flash-banner.show { display: block; }
+  .till.flashing { animation: flash .8s ease-in-out 2; }
+  @keyframes flash { 0%,100% { box-shadow: inset 0 0 0 0 rgba(200,150,46,0); } 50% { box-shadow: inset 0 0 0 10px rgba(200,150,46,1); background: #FFF4D6; } }
+  @media (prefers-reduced-motion: reduce) {
+    .bell.ring, .till.flashing { animation: none; }
+    .till.flashing { box-shadow: inset 0 0 0 8px var(--saffron); }
+  }
+
+  /* High contrast */
+  .till[data-contrast="high"] { background: #000000; color: #FFFFFF; }
+  .till[data-contrast="high"] .till-head { background: #000000; color: #FFFFFF; border-bottom: 3px solid #FFD400; }
+  .till[data-contrast="high"] .till-head .brand { color: #FFD400; }
+  .till[data-contrast="high"] .till-label { color: #FFD400; }
+  .till[data-contrast="high"] .item { background: #000000; border: 2px solid #FFFFFF; color: #FFFFFF; }
+  .till[data-contrast="high"] .item .name { font-weight: 700; }
+  .till[data-contrast="high"] .order { background: #000000; border: 2px solid #FFFFFF; color: #FFFFFF; }
+  .till[data-contrast="high"] .flash-banner { background: #FFD400; color: #000000; }
+  .till[data-contrast="high"] .alert-row { color: #FFFFFF; }
+
+  .test-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 12px; }
+  .test-row .btn-ghost { background: #334155; color: #FFFFFF; border-color: #475569; }
+  .test-row .hint { color: #CBD5E1; font-size: 16px; }
+
+  /* ---------- Settings ---------- */
+  .setting { padding: 12px 0; border-top: 1px solid var(--line); }
+  .setting:first-of-type { border-top: 0; padding-top: 4px; }
+  .setting .name { font-weight: 700; margin-bottom: 6px; display: block; }
+  .setting .what { font-size: 16px; color: var(--grey); margin: -4px 0 6px; }
+  .opts { display: flex; flex-wrap: wrap; gap: 8px; }
+  .opt { background: var(--white); color: var(--ink); border: 2px solid var(--line); padding: 8px 14px; font-weight: 700; }
+  .opt:hover { border-color: var(--blue); }
+  .opt[aria-pressed="true"] { background: var(--blue); border-color: var(--blue); color: var(--white); }
+  .opt[aria-pressed="true"]::before { content: "✓ "; }
+
+  .further { background: var(--slate); border: 0; }
+  .further strong { color: var(--grey); text-transform: uppercase; letter-spacing: .05em; font-size: 14px; display: block; margin-bottom: 4px; }
+  .allset { background: var(--green); color: var(--white); border: 0; }
+  .allset h2 { color: var(--white); }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .hidden { display: none !important; }
+  footer { text-align: center; color: var(--grey); font-size: 14px; padding: 0 16px 24px; }
+</style>
+</head>
+<body>
+<header>
+  <div class="inner">
+    <div class="kicker">Year 9 ICT &nbsp;•&nbsp; Lesson 16 &nbsp;•&nbsp; Accessibility</div>
+    <h1>Till Settings Lab</h1>
+    <p class="sub">Qahwa House &nbsp;•&nbsp; The Pearl</p>
+  </div>
+</header>
+
+<main>
+  <div class="card tip">
+    <p><strong>You are a junior consultant at Nakhla Digital.</strong> The Pearl's new till comes with its settings badly chosen. Set it up for each person:</p>
+    <ol>
+      <li>Choose a person. Read what they find hard.</li>
+      <li>Change the settings. The till changes straight away.</li>
+      <li>Click <strong>Check</strong>. Then type the settings you chose, and why, in Section B1 of your Task Sheet.</li>
+    </ol>
+  </div>
+
+  <div class="tabs" role="tablist" aria-label="People to set the till up for" id="tabs"></div>
+  <section class="person" role="tabpanel" id="panel" aria-labelledby="">
+    <div class="person-top">
+      <h2 id="p-name"></h2>
+      <span class="tag" id="p-tag"></span>
+    </div>
+    <p class="need" id="p-need"></p>
+    <div class="actions">
+      <button class="btn-primary" id="check">Check</button>
+      <button class="btn-ghost" id="reset">Reset this person</button>
+    </div>
+    <div id="feedback" class="feedback hidden" aria-live="polite"></div>
+  </section>
+
+  <div class="lab">
+    <section aria-labelledby="till-title">
+      <p class="panel-title" id="till-title">The till screen (Till 1)</p>
+      <div class="till-frame">
+        <div class="till-scroll" id="till-scroll">
+          <div class="till" id="till" data-text="s" data-buttons="s" data-contrast="std" data-magnifier="off" data-labels="off" data-alert="sound">
+            <div class="till-head"><span class="brand">Qahwa House</span><span class="branch">The Pearl &nbsp;•&nbsp; Till 1</span></div>
+            <div class="till-body">
+              <div class="till-label">Menu</div>
+              <div class="menu-grid" id="menu"></div>
+              <div class="till-label">Orders</div>
+              <div class="orders">
+                <div class="order"><span>Order 41 &nbsp;•&nbsp; Table 6</span><span class="pill ready"><span class="word">READY ✓</span><span class="sr status-sr">status shown by colour only: green</span></span></div>
+                <div class="order"><span>Order 42 &nbsp;•&nbsp; Table 3</span><span class="pill waiting"><span class="word">WAITING ⏳</span><span class="sr status-sr">status shown by colour only: red</span></span></div>
+              </div>
+              <div class="alert-row"><span class="bell" id="bell" aria-hidden="true">🔔</span><span id="alert-text">Order-ready alert: beep</span><span class="beep hidden" id="beep">♪ beep… beep…</span></div>
+            </div>
+            <div class="flash-banner" id="banner" role="status">ORDER 42 READY &nbsp;•&nbsp; Table 3</div>
+          </div>
+        </div>
+        <div class="test-row">
+          <button class="btn-ghost" id="test">▶ Test the order-ready alert</button>
+          <span class="hint">Order 42 is ready in the kitchen.</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="card" aria-labelledby="set-title">
+      <p class="panel-title" id="set-title">Settings → Accessibility</p>
+      <div id="settings"></div>
+    </section>
+  </div>
+
+  <div class="card allset hidden" id="allset" aria-live="polite">
+    <h2>All four people are set up ✓</h2>
+    <p style="margin:0">Check your B1 table has a setting and a reason for each person. Then answer B2: which of Mariam's settings would help every member of staff?</p>
+  </div>
+
+  <div class="card further">
+    <strong>Going further</strong>
+    <p style="margin:0">The tills are shared by every barista. Which settings would help <em>all</em> staff — and which would you keep just for one person?</p>
+  </div>
+</main>
+<footer>USI ICT Department &nbsp;•&nbsp; Year 9 ICT &nbsp;•&nbsp; Spec 1.8.1–1.8.3 &nbsp;•&nbsp; Nothing you do here is saved</footer>
+
+<script>
+(function () {
+  var MENU = [
+    ["Karak tea", 8], ["Spanish latte", 22], ["Saffron latte", 24],
+    ["Cappuccino", 19], ["Mint lemonade", 18], ["Luqaimat", 22]
+  ];
+  var SETTINGS = [
+    { key: "text", name: "Text size", what: "How big the words are", opts: [["s", "Small"], ["m", "Medium"], ["l", "Large"], ["xl", "Extra large"]] },
+    { key: "buttons", name: "Button size", what: "How big the menu buttons are", opts: [["s", "Small"], ["l", "Large"]] },
+    { key: "contrast", name: "Contrast", what: "Pale grey on white, or strong colours", opts: [["std", "Standard"], ["high", "High contrast"]] },
+    { key: "magnifier", name: "Magnifier", what: "Makes the whole till view 1.5 times bigger", opts: [["off", "Off"], ["on", "On"]] },
+    { key: "labels", name: "Show labels with colours", what: "Adds the words READY and WAITING", opts: [["off", "Off"], ["on", "On"]] },
+    { key: "alert", name: "Order-ready alert", what: "What happens when the kitchen finishes an order", opts: [["sound", "Sound only"], ["flash", "Sound + flash on screen"]] }
+  ];
+  var DEFAULTS = { text: "s", buttons: "s", contrast: "std", magnifier: "off", labels: "off", alert: "sound" };
+
+  var PEOPLE = [
+    { id: "mariam", name: "Mariam", role: "barista, partially sighted", real: true,
+      need: "Mariam is a barista at The Pearl. She is partially sighted: she uses magnification and large text. Low-contrast screens and small touch buttons are hard for her.",
+      checks: [
+        { label: "Text big enough to read", ok: function (s) { return s.text === "l" || s.text === "xl"; }, fix: "Mariam still finds the small text hard to read — try Large text or bigger." },
+        { label: "Buttons big enough to hit", ok: function (s) { return s.buttons === "l"; }, fix: "Small touch buttons are hard for Mariam — try Large buttons." },
+        { label: "Strong, clear colours", ok: function (s) { return s.contrast === "high"; }, fix: "Mariam still finds the grey text hard — try High contrast." }
+      ],
+      extra: function (s) { return s.magnifier === "on" ? "The Magnifier helps Mariam too. But the till is shared — would it get in other staff's way?" : "The Magnifier is optional for Mariam: she uses magnification on her own devices."; } },
+    { id: "hamad", name: "Hamad", role: "limited arm movement", real: false,
+      need: "Hamad has limited movement in his arm. Small targets are hard for him to hit accurately.",
+      checks: [
+        { label: "Buttons easy to hit", ok: function (s) { return s.buttons === "l"; }, fix: "Small buttons are hard for Hamad to hit — try Large buttons." }
+      ],
+      extra: function () { return "Away from the screen, a trackerball or a large-button keypad would help Hamad too."; } },
+    { id: "sara", name: "Sara", role: "red–green colour blind", real: false,
+      need: "Sara has red–green colour blindness. The till shows “ready” orders in green and “waiting” orders in red — to her they look almost the same.",
+      checks: [
+        { label: "Order status clear without colour", ok: function (s) { return s.labels === "on"; }, fix: "Sara can't tell the green “ready” from the red “waiting” — try Show labels with colours." }
+      ],
+      extra: function () { return "On a PC, a colour filter (Settings → Accessibility) would also help Sara."; } },
+    { id: "yusuf", name: "Yusuf", role: "deaf", real: false,
+      need: "Yusuf is deaf. The till beeps when a kitchen order is ready — but he can't hear the beep.",
+      checks: [
+        { label: "Can see the order-ready alert", ok: function (s) { return s.alert === "flash"; }, fix: "Yusuf can't hear the beep — try Sound + flash on screen. (Press “Test the order-ready alert” to see it.)" }
+      ],
+      extra: function () { return "A flash on screen also helps everyone in a noisy café."; } }
+  ];
+
+  function $(id) { return document.getElementById(id); }
+  function copy(o) { var r = {}; for (var k in o) r[k] = o[k]; return r; }
+  var state = {}; var passed = {};
+  PEOPLE.forEach(function (p) { state[p.id] = copy(DEFAULTS); passed[p.id] = false; });
+  var current = 0;
+
+  // ----- build the menu -----
+  var menu = $("menu");
+  MENU.forEach(function (m) {
+    var d = document.createElement("div"); d.className = "item";
+    var n = document.createElement("span"); n.className = "name"; n.textContent = m[0];
+    var pr = document.createElement("span"); pr.className = "price"; pr.textContent = "QAR " + m[1];
+    d.appendChild(n); d.appendChild(pr); menu.appendChild(d);
+  });
+
+  // ----- build the tabs -----
+  var tabs = $("tabs"); var tabEls = [];
+  PEOPLE.forEach(function (p, i) {
+    var b = document.createElement("button");
+    b.className = "tab"; b.id = "tab-" + p.id; b.setAttribute("role", "tab");
+    b.setAttribute("aria-controls", "panel");
+    b.innerHTML = "";
+    var t = document.createElement("span"); t.textContent = (i + 1) + ". " + p.name + " ";
+    var done = document.createElement("span"); done.className = "done"; done.id = "done-" + p.id;
+    var sm = document.createElement("small"); sm.textContent = p.role;
+    b.appendChild(t); b.appendChild(done); b.appendChild(sm);
+    b.addEventListener("click", function () { select(i, true); });
+    b.addEventListener("keydown", function (e) {
+      var k = e.key, j = null;
+      if (k === "ArrowRight") j = (i + 1) % PEOPLE.length;
+      if (k === "ArrowLeft") j = (i + PEOPLE.length - 1) % PEOPLE.length;
+      if (k === "Home") j = 0;
+      if (k === "End") j = PEOPLE.length - 1;
+      if (j !== null) { e.preventDefault(); select(j, true); tabEls[j].focus(); }
+    });
+    tabs.appendChild(b); tabEls.push(b);
+  });
+
+  // ----- build the settings -----
+  var settingsEl = $("settings"); var optEls = {};
+  SETTINGS.forEach(function (st) {
+    var wrap = document.createElement("div"); wrap.className = "setting";
+    var lab = document.createElement("span"); lab.className = "name"; lab.id = "lab-" + st.key; lab.textContent = st.name;
+    var what = document.createElement("p"); what.className = "what"; what.textContent = st.what;
+    var g = document.createElement("div"); g.className = "opts"; g.setAttribute("role", "group"); g.setAttribute("aria-labelledby", "lab-" + st.key);
+    optEls[st.key] = [];
+    st.opts.forEach(function (o) {
+      var b = document.createElement("button"); b.className = "opt"; b.textContent = o[1];
+      b.setAttribute("data-val", o[0]); b.setAttribute("aria-pressed", "false");
+      b.addEventListener("click", function () { setValue(st.key, o[0]); });
+      g.appendChild(b); optEls[st.key].push(b);
+    });
+    wrap.appendChild(lab); wrap.appendChild(what); wrap.appendChild(g); settingsEl.appendChild(wrap);
+  });
+
+  var till = $("till");
+  function apply() {
+    var s = state[PEOPLE[current].id];
+    SETTINGS.forEach(function (st) {
+      till.setAttribute("data-" + st.key, s[st.key]);
+      optEls[st.key].forEach(function (b) { b.setAttribute("aria-pressed", b.getAttribute("data-val") === s[st.key] ? "true" : "false"); });
+    });
+    $("till-scroll").classList.toggle("zoomed", s.magnifier === "on");
+    $("alert-text").textContent = s.alert === "flash" ? "Order-ready alert: beep + flash" : "Order-ready alert: beep";
+    document.querySelectorAll(".status-sr").forEach(function (el, k) {
+      el.textContent = s.labels === "on" ? "" : "status shown by colour only: " + (k === 0 ? "green" : "red");
+    });
+  }
+
+  function setValue(key, val) {
+    var id = PEOPLE[current].id;
+    if (state[id][key] === val) return;
+    state[id][key] = val;
+    apply();
+    var fb = $("feedback");
+    if (!fb.classList.contains("hidden")) {
+      fb.className = "feedback stale"; fb.innerHTML = "";
+      var h = document.createElement("div"); h.className = "head"; h.textContent = "Settings changed — click Check again.";
+      fb.appendChild(h);
+    }
+  }
+
+  function select(i, fromUser) {
+    current = i;
+    var p = PEOPLE[i];
+    tabEls.forEach(function (t, k) {
+      t.setAttribute("aria-selected", k === i ? "true" : "false");
+      t.setAttribute("tabindex", k === i ? "0" : "-1");
+    });
+    $("panel").setAttribute("aria-labelledby", "tab-" + p.id);
+    $("p-name").textContent = (i + 1) + ".  " + p.name;
+    var tag = $("p-tag");
+    tag.className = "tag " + (p.real ? "real" : "example");
+    tag.textContent = p.real ? "Qahwa House staff" : "Example person";
+    $("p-need").textContent = p.need;
+    $("feedback").className = "feedback hidden"; $("feedback").innerHTML = "";
+    stopAlert();
+    apply();
+  }
+
+  function check() {
+    var p = PEOPLE[current], s = state[p.id];
+    var results = p.checks.map(function (c) { return { c: c, ok: c.ok(s) }; });
+    var missing = results.filter(function (r) { return !r.ok; }).length;
+    var fb = $("feedback"); fb.innerHTML = "";
+    fb.className = "feedback " + (missing ? "fail" : "pass");
+    var h = document.createElement("div"); h.className = "head";
+    h.textContent = missing ? "Not yet — " + missing + (missing === 1 ? " need" : " needs") + " still to meet." : "✓ All of " + p.name + "'s needs are met.";
+    fb.appendChild(h);
+    var ul = document.createElement("ul");
+    results.forEach(function (r) {
+      var li = document.createElement("li"); li.className = r.ok ? "ok" : "no";
+      var m = document.createElement("span"); m.className = "mark"; m.textContent = r.ok ? "✓" : "✗";
+      m.setAttribute("aria-label", r.ok ? "met:" : "not met:");
+      li.appendChild(m);
+      li.appendChild(document.createTextNode(r.ok ? r.c.label : r.c.label + ". " + r.c.fix));
+      ul.appendChild(li);
+    });
+    fb.appendChild(ul);
+    if (!missing) {
+      var ex = document.createElement("p"); ex.className = "extra"; ex.textContent = p.extra(s); fb.appendChild(ex);
+      var rem = document.createElement("p"); rem.className = "reminder"; rem.textContent = "Now type " + p.name + "'s settings, and why, in B1.";
+      fb.appendChild(rem);
+    }
+    passed[p.id] = !missing;
+    $("done-" + p.id).textContent = passed[p.id] ? "✓" : "";
+    var all = PEOPLE.every(function (q) { return passed[q.id]; });
+    $("allset").classList.toggle("hidden", !all);
+  }
+
+  function reset() {
+    var p = PEOPLE[current];
+    state[p.id] = copy(DEFAULTS); passed[p.id] = false;
+    $("done-" + p.id).textContent = "";
+    $("allset").classList.add("hidden");
+    $("feedback").className = "feedback hidden"; $("feedback").innerHTML = "";
+    stopAlert();
+    apply();
+  }
+
+  var alertTimer = null;
+  function stopAlert() {
+    clearTimeout(alertTimer);
+    $("bell").classList.remove("ring"); $("beep").classList.add("hidden");
+    $("banner").classList.remove("show"); till.classList.remove("flashing");
+  }
+  function testAlert() {
+    stopAlert();
+    void till.offsetWidth; // restart animations
+    var s = state[PEOPLE[current].id];
+    $("bell").classList.add("ring"); $("beep").classList.remove("hidden");
+    if (s.alert === "flash") { till.classList.add("flashing"); $("banner").classList.add("show"); }
+    alertTimer = setTimeout(stopAlert, 4000);
+  }
+
+  $("check").addEventListener("click", check);
+  $("reset").addEventListener("click", reset);
+  $("test").addEventListener("click", testAlert);
+  select(0, false);
+})();
+</script>
+</body>
+</html>
