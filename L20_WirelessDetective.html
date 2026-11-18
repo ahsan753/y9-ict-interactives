@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wireless Detective — Year 9 ICT Lesson 20</title>
+<style>
+  :root {
+    --navy: #0F172A; --ink: #1E293B; --grey: #64748B; --line: #CBD5E1;
+    --blue: #1D4ED8; --bluePale: #DBEAFE; --green: #15803D; --greenPale: #DCFCE7;
+    --amber: #B45309; --amberPale: #FEF3C7; --slate: #F1F5F9; --white: #FFFFFF;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: Calibri, "Segoe UI", Arial, sans-serif; font-size: 20px; line-height: 1.45; color: var(--ink); background: var(--slate); }
+  header { background: var(--navy); color: var(--white); padding: 20px 24px; }
+  header h1 { margin: 0; font-size: 34px; }
+  header p { margin: 4px 0 0; color: #CBD5E1; font-size: 18px; }
+  main { max-width: 980px; margin: 0 auto; padding: 20px 16px 40px; }
+  section { background: var(--white); border-radius: 14px; padding: 20px 22px; margin-bottom: 22px; box-shadow: 0 1px 3px rgba(15,23,42,.08); }
+  h2 { margin: 0 0 6px; font-size: 26px; color: var(--navy); }
+  .hint { color: var(--grey); margin: 0 0 14px; font-size: 18px; }
+  /* Range ladder */
+  .ladder { display: flex; align-items: flex-end; gap: 8px; height: 260px; border-bottom: 3px solid var(--navy); padding-top: 34px; }
+  .bar { flex: 1; background: var(--blue); color: var(--white); border: none; border-radius: 8px 8px 0 0; font: inherit; font-weight: 700; font-size: 18px; cursor: pointer; position: relative; padding: 8px 4px; display: flex; align-items: flex-start; justify-content: center; }
+  .bar span.reach { position: absolute; top: -30px; left: 0; right: 0; color: var(--navy); font-size: 16px; text-align: center; }
+  .bar[aria-pressed="true"] { background: var(--green); }
+  .bar:focus-visible, .opt:focus-visible, .nav:focus-visible { outline: 4px solid #F59E0B; outline-offset: 2px; }
+  .info { margin-top: 16px; background: var(--bluePale); border-radius: 10px; padding: 14px 18px; min-height: 120px; }
+  .info h3 { margin: 0 0 6px; color: var(--blue); font-size: 24px; }
+  .info p { margin: 4px 0; }
+  .plus { color: var(--green); font-weight: 700; }
+  .minus { color: #B91C1C; font-weight: 700; }
+  /* Cases */
+  .progress { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+  .dot { width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--line); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; color: var(--grey); background: var(--white); }
+  .dot.current { border-color: var(--blue); color: var(--blue); }
+  .dot.done { background: var(--green); border-color: var(--green); color: var(--white); }
+  .case { background: #FFEDD5; border-radius: 10px; padding: 16px 18px; font-size: 24px; margin-bottom: 14px; }
+  .case b { color: #EA580C; }
+  .opts { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+  .opt { font: inherit; font-weight: 700; font-size: 20px; padding: 12px 8px; border-radius: 10px; border: 2px solid var(--blue); background: var(--white); color: var(--blue); cursor: pointer; }
+  .opt:hover { background: var(--bluePale); }
+  .opt.right { background: var(--green); border-color: var(--green); color: var(--white); }
+  .opt.wrong { background: var(--amberPale); border-color: var(--amber); color: var(--amber); }
+  .feedback { margin-top: 14px; border-radius: 10px; padding: 14px 18px; min-height: 64px; font-size: 20px; }
+  .feedback.good { background: var(--greenPale); }
+  .feedback.try { background: var(--amberPale); }
+  .feedback.empty { background: var(--slate); color: var(--grey); }
+  .type { margin-top: 10px; font-weight: 700; color: var(--navy); }
+  .navrow { display: flex; justify-content: space-between; margin-top: 16px; gap: 10px; }
+  .nav { font: inherit; font-weight: 700; font-size: 20px; padding: 10px 20px; border-radius: 10px; border: none; background: var(--navy); color: var(--white); cursor: pointer; }
+  .nav[disabled] { background: var(--line); color: var(--grey); cursor: default; }
+  .done-box { background: var(--greenPale); border-radius: 10px; padding: 16px 18px; font-size: 22px; }
+  footer { text-align: center; color: var(--grey); font-size: 16px; }
+  @media (max-width: 640px) { .bar { font-size: 13px; padding: 6px 2px; } .bar span.reach { font-size: 12px; } .ladder { gap: 4px; } .case { font-size: 21px; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>Wireless Detective</h1>
+  <p>Year 9 ICT • Lesson 20 • Wireless technologies</p>
+</header>
+<main>
+  <section aria-labelledby="ladder-h">
+    <h2 id="ladder-h">1. How far does it reach?</h2>
+    <p class="hint">Shortest reach on the left, longest on the right. Click a bar to read about it.</p>
+    <div class="ladder" id="ladder" role="group" aria-label="Wireless technologies in order of range"></div>
+    <div class="info" id="info" aria-live="polite"><p>Click a bar above.</p></div>
+  </section>
+
+  <section aria-labelledby="cases-h">
+    <h2 id="cases-h">2. Solve the 8 cases</h2>
+    <p class="hint">Choose the wireless technology for each case. Then type the answer <b>and why</b> in the B1 table on your Task Sheet — same order.</p>
+    <div class="progress" id="progress" aria-hidden="true"></div>
+    <div id="caseArea"></div>
+  </section>
+  <footer>Nothing is saved on this page — your Task Sheet is your record.</footer>
+</main>
+
+<script>
+(function () {
+  "use strict";
+  var TECH = [
+    { id: "NFC", reach: "a few cm", h: 18, what: "Near-field communication: works only when two devices are a few centimetres apart.", eg: "contactless payment; paying with a phone or watch; hotel key cards", plus: "a quick tap; hard for anyone to read from far away", minus: "the devices must almost touch; small amounts of data" },
+    { id: "Infra-red", reach: "a few m", h: 30, what: "Invisible light. You must point it at the device with nothing in the way (line of sight).", eg: "TV remote, air-conditioning remote", plus: "cheap and simple", minus: "line of sight only; a few metres; slow" },
+    { id: "Bluetooth", reach: "about 10 m", h: 44, what: "Connects a few devices close together, with no router. You pair them once.", eg: "wireless earbuds, smartwatch, wireless keyboard", plus: "uses little battery; no router needed", minus: "short range (about 10 m); slower than Wi-Fi; only a few devices" },
+    { id: "Wi-Fi", reach: "a building", h: 58, what: "Connects devices to a network and the internet, using a router.", eg: "laptops at school; phones and TVs at home; customer Wi-Fi in a café", plus: "fast; many devices at once; covers a building", minus: "needs a router; walls make the signal weaker; uses more battery" },
+    { id: "3G / 4G", reach: "kilometres", h: 76, what: "Mobile data through phone masts (towers). 4G is newer and faster than 3G.", eg: "the internet on your phone when you are out; tethering a laptop", plus: "works almost anywhere with a phone signal", minus: "uses your data allowance; weak signal in some places" },
+    { id: "GPS", reach: "the Earth", h: 96, what: "Works out where you are from satellite signals. The receiver only listens.", eg: "sat nav, maps on a phone, a running watch", plus: "works anywhere on Earth, outdoors", minus: "poor indoors, in tunnels and underground; only gives your position" }
+  ];
+  var OPTIONS = ["Wi-Fi", "Bluetooth", "3G", "4G", "GPS", "Infra-red", "NFC"];
+  var CASES = [
+    { text: "A family's laptops, phones and smart TV all connect to the internet at home.", ok: ["Wi-Fi"], why: "Wi-Fi — lots of devices, the internet, a whole home.", clue: "Lots of devices, a whole house, and the internet. Which one needs a router?" },
+    { text: "A runner listens to music from her phone through wireless earbuds.", ok: ["Bluetooth"], why: "Bluetooth — two devices close together, and it saves battery.", clue: "Only two devices, very close, and the battery matters." },
+    { text: "A hiker's watch shows exactly where she is on a mountain.", ok: ["GPS"], why: "GPS — the watch works out its position from satellite signals.", clue: "No Wi-Fi on a mountain. What tells you WHERE you are?" },
+    { text: "You turn the air-conditioning down, pointing its remote control at the unit.", ok: ["Infra-red"], why: "Infra-red — invisible light, so you have to point it with nothing in the way.", clue: "You have to POINT it. Which one is invisible light?" },
+    { text: "A passenger taps his bank card on the reader to pay for a taxi.", ok: ["NFC"], why: "NFC — contactless payment only works a few centimetres apart.", clue: "He TAPS the card. Which one works only a few centimetres apart?" },
+    { text: "A taxi driver checks his emails on his phone in the desert outside Doha, with no Wi-Fi nearby.", ok: ["4G", "3G"], why: "Mobile data (4G, or 3G) — it comes from phone masts, so it works far from any Wi-Fi.", clue: "No Wi-Fi, but his phone still gets the internet. Where does a phone's own data come from?" },
+    { text: "An old phone on 3G keeps stopping to load videos. Which mobile network would play them more smoothly?", ok: ["4G"], why: "4G — it is newer and faster than 3G.", clue: "Which mobile network is newer and faster than 3G?" },
+    { text: "Twenty teachers' laptops in the staffroom all print to one wireless printer.", ok: ["Wi-Fi"], why: "Wi-Fi — many devices across a room, sharing one printer.", clue: "Twenty laptops — that is a lot of devices for Bluetooth." }
+  ];
+
+  // ---------- Range ladder ----------
+  var ladder = document.getElementById("ladder"), info = document.getElementById("info");
+  TECH.forEach(function (t, i) {
+    var b = document.createElement("button");
+    b.className = "bar"; b.type = "button";
+    b.style.height = t.h + "%";
+    b.setAttribute("aria-pressed", "false");
+    b.setAttribute("aria-label", t.id + ", reaches " + t.reach);
+    b.innerHTML = '<span class="reach">' + t.reach + '</span>' + t.id;
+    b.addEventListener("click", function () { showTech(i); });
+    ladder.appendChild(b);
+  });
+  function showTech(i) {
+    var t = TECH[i];
+    Array.prototype.forEach.call(ladder.children, function (b, k) { b.setAttribute("aria-pressed", k === i ? "true" : "false"); });
+    info.innerHTML = "<h3>" + t.id + " — reaches " + t.reach + "</h3>" +
+      "<p>" + t.what + "</p>" +
+      "<p><b>For example:</b> " + t.eg + "</p>" +
+      '<p><span class="plus">+</span> ' + t.plus + "</p>" +
+      '<p><span class="minus">–</span> ' + t.minus + "</p>";
+  }
+
+  // ---------- Cases ----------
+  var current = 0, state = CASES.map(function () { return { tries: 0, solved: false, picked: [] }; });
+  var progress = document.getElementById("progress"), area = document.getElementById("caseArea");
+
+  function drawProgress() {
+    progress.innerHTML = "";
+    CASES.forEach(function (c, i) {
+      var d = document.createElement("div");
+      d.className = "dot" + (state[i].solved ? " done" : "") + (i === current ? " current" : "");
+      d.textContent = i + 1;
+      progress.appendChild(d);
+    });
+  }
+
+  function drawCase() {
+    drawProgress();
+    if (current >= CASES.length) {
+      var first = state.filter(function (s) { return s.solved && s.tries === 1; }).length;
+      area.innerHTML = '<div class="done-box"><b>All 8 cases solved.</b><br>First time: ' + first + ' out of 8.<br>Check every row of B1 has an answer AND a reason, then move on to the Big Question (Section C).</div>' +
+        '<div class="navrow"><button class="nav" type="button" id="back">← Back to case 8</button><span></span></div>';
+      document.getElementById("back").addEventListener("click", function () { current = CASES.length - 1; drawCase(); });
+      return;
+    }
+    var c = CASES[current], st = state[current];
+    var html = '<div class="case"><b>Case ' + (current + 1) + ' of 8.</b> ' + c.text + '</div><div class="opts" role="group" aria-label="Choose a wireless technology">';
+    OPTIONS.forEach(function (o) {
+      var cls = "opt";
+      if (st.picked.indexOf(o) !== -1) cls += c.ok.indexOf(o) !== -1 ? " right" : " wrong";
+      html += '<button type="button" class="' + cls + '" data-opt="' + o + '"' + (st.solved ? " disabled" : "") + ">" + o + "</button>";
+    });
+    html += '</div><div class="feedback empty" id="fb" aria-live="polite">Choose one.</div>' +
+      '<div class="navrow"><button class="nav" type="button" id="prev"' + (current === 0 ? " disabled" : "") + '>← Previous</button>' +
+      '<button class="nav" type="button" id="next"' + (st.solved ? "" : " disabled") + ">" + (current === CASES.length - 1 ? "Finish →" : "Next case →") + "</button></div>";
+    area.innerHTML = html;
+    if (st.solved) showFeedback(true);
+    else if (st.tries > 0) showFeedback(false);
+    Array.prototype.forEach.call(area.querySelectorAll(".opt"), function (b) {
+      b.addEventListener("click", function () { choose(b.getAttribute("data-opt")); });
+    });
+    document.getElementById("prev").addEventListener("click", function () { if (current > 0) { current--; drawCase(); } });
+    document.getElementById("next").addEventListener("click", function () { if (state[current].solved) { current++; drawCase(); focusTop(); } });
+  }
+
+  function choose(o) {
+    var c = CASES[current], st = state[current];
+    if (st.solved) return;
+    st.tries++;
+    if (st.picked.indexOf(o) === -1) st.picked.push(o);
+    if (c.ok.indexOf(o) !== -1) { st.solved = true; }
+    else if (st.tries >= 2) {
+      // After two wrong tries, show the answer so nobody gets stuck.
+      st.solved = true;
+      c.ok.forEach(function (a) { if (st.picked.indexOf(a) === -1) st.picked.push(a); });
+      st.revealed = true;
+    }
+    drawCase();
+    var nx = document.getElementById("next"); if (st.solved && nx) nx.focus();
+  }
+
+  function showFeedback(solved) {
+    var c = CASES[current], st = state[current], fb = document.getElementById("fb");
+    if (solved) {
+      fb.className = "feedback good";
+      fb.innerHTML = (st.revealed ? "<b>The answer:</b> " : "<b>Yes!</b> ") + c.why +
+        '<div class="type">Now type case ' + (current + 1) + " in B1: the technology and why.</div>";
+    } else {
+      fb.className = "feedback try";
+      fb.innerHTML = "<b>Not quite.</b> Clue: " + c.clue;
+    }
+  }
+  function focusTop() { var h = document.getElementById("cases-h"); if (h) h.scrollIntoView({ behavior: "smooth", block: "start" }); }
+
+  drawCase();
+})();
+</script>
+</body>
+</html>
